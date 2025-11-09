@@ -25,7 +25,7 @@ use Psr\Http\Message\ServerRequestInterface;
 // =====================================================
 // KONFIGURASI DATABASE
 // =====================================================
-$dbConfig = 'root:@localhost:3307/pemilu_mahasiswa'; // user:password@host/database
+$dbConfig = 'root:@localhost/pemilu_mahasiswa'; // user:password@host/database
 
 // =====================================================
 // INISIALISASI EVENT LOOP & DATABASE CONNECTION
