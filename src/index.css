@@ -64,15 +64,6 @@ All colors MUST be HSL.
     --chart-3: 40 35% 75%; /* Beige untuk fakultas */
     --chart-4: 45 40% 80%;
     --chart-5: 30 45% 50%;
-
-    /* Gradients (HSL stops) */
-    --gradient-primary: linear-gradient(
-      90deg,
-      hsl(38 65% 10%),
-      hsl(33 93% 54%),
-      hsl(42 84% 66%)
-    );
-    --gradient-warm: linear-gradient(90deg, hsl(28 96% 29%), hsl(33 93% 54%));
   }
 
   .dark {
@@ -112,6 +103,14 @@ All colors MUST be HSL.
     --chart-3: 45 40% 70%;
     --chart-4: 50 40% 75%;
     --chart-5: 30 50% 50%;
+  }
+}
+
+@layer utilities {
+
+  .hero-padding {
+    padding-top: clamp(7rem, 12vw, 11rem);
+    padding-bottom: clamp(3rem, 7vw, 5rem);
   }
 }
 
