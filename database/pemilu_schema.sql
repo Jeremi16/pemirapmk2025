@@ -74,14 +74,14 @@ INSERT INTO kandidat (nama, nomor_urut, visi, misi) VALUES
 -- Insert Sample Pemilih dengan token unik
 -- Token di-generate dengan bin2hex(random_bytes(32))
 INSERT INTO pemilih (nim, nama, fakultas, program_studi, token) VALUES
-('2021001', 'Ahmad Fauzi', 'Teknik', 'Informatika', 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456'),
-('2021002', 'Siti Nurhaliza', 'Ekonomi', 'Akuntansi', 'b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef1234567'),
-('2021003', 'Budi Santoso', 'Teknik', 'Elektro', 'c3d4e5f6789012345678901234567890abcdef1234567890abcdef12345678'),
-('2021004', 'Dewi Lestari', 'FMIPA', 'Matematika', 'd4e5f6789012345678901234567890abcdef1234567890abcdef123456789'),
-('2021005', 'Eko Prasetyo', 'Ekonomi', 'Manajemen', 'e5f6789012345678901234567890abcdef1234567890abcdef1234567890a'),
-('2021006', 'Fitri Handayani', 'FMIPA', 'Fisika', 'f6789012345678901234567890abcdef1234567890abcdef1234567890ab'),
-('2021007', 'Gunawan', 'Teknik', 'Sipil', 'g789012345678901234567890abcdef1234567890abcdef1234567890abc'),
-('2021008', 'Hana Wijaya', 'Hukum', 'Hukum', 'h89012345678901234567890abcdef1234567890abcdef1234567890abcd');
+('123450591', 'Ahmad Fauzi', 'Teknik', 'Informatika', 'a1b2c3'),
+('124450548', 'Siti Nurhaliza', 'Ekonomi', 'Akuntansi', 'b2c3d4'),
+('121450439', 'Budi Santoso', 'Teknik', 'Elektro', 'c3d4e5'),
+('124450311', 'Dewi Lestari', 'FMIPA', 'Matematika', 'd4e5f6'),
+('124450191', 'Eko Prasetyo', 'Ekonomi', 'Manajemen', 'e5f6g7'),
+('124450941', 'Fitri Handayani', 'FMIPA', 'Fisika', 'f6g7h8'),
+('124450453', 'Gunawan', 'Teknik', 'Sipil', 'g7h8i9'),
+('124450874', 'Hana Wijaya', 'Hukum', 'Hukum', 'h8i9j0');
 
 -- =====================================================
 -- QUERY UNTUK STATISTIK (Digunakan oleh ReactPHP API)

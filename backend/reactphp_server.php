@@ -25,7 +25,7 @@ use Psr\Http\Message\ServerRequestInterface;
 // =====================================================
 // KONFIGURASI DATABASE
 // =====================================================
-$dbConfig = 'root:@localhost:3307/pemilu_mahasiswa'; // user:password@host/database
+$dbConfig = 'root:@localhost:3306/pemilu_mahasiswa'; // user:password@host/database
 
 // =====================================================
 // INISIALISASI EVENT LOOP & DATABASE CONNECTION
@@ -168,12 +168,14 @@ function handleAdminLogin(ServerRequestInterface $request, ConnectionInterface $
                 }
 
                 $admin = $result->resultRows[0];
-                if (!password_verify($password, $admin['password'])) {
+
+                //  Password tanpa hash → langsung dibandingkan 
+                if ($admin['password'] !== $password) {
                     return jsonResponse(['success' => false, 'message' => 'Password salah'], 401);
                 }
 
-                // Generate simple token (untuk production, gunakan JWT)
-                $token = bin2hex(random_bytes(32));
+                // Generate token sederhana
+                $token = bin2hex(random_bytes(8));
 
                 return jsonResponse([
                     'success' => true,
@@ -186,7 +188,6 @@ function handleAdminLogin(ServerRequestInterface $request, ConnectionInterface $
             return jsonResponse(['success' => false, 'message' => 'Database error'], 500);
         });
 }
-
 /**
  * ENDPOINT: GET /api/admin/stats
  * Statistik untuk admin dashboard
