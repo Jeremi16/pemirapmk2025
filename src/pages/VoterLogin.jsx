@@ -51,9 +51,9 @@ const VoterLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-secondary overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#f1c662d3] to-[#511600a1] overflow-hidden">
       <div className="w-full max-w-5xl">
-        <Card className="border-none flex flex-col lg:flex-row bg-white/95 rounded-2xl lg:rounded-3xl shadow-2xl overflow-hidden">
+        <Card className="border-none flex flex-row bg-primary-foreground/95 rounded-2xl shadow-2xl overflow-hidden">
           <CardContent className="w-1/2 p-12">
             <form onSubmit={handleLogin} className="max-w-md mx-auto">
               <div className="mb-8">
@@ -74,7 +74,7 @@ const VoterLogin = () => {
                     value={nim}
                     onChange={(e) => setNim(e.target.value)}
                     required
-                    className="h-12 rounded-md bg-background/70 placeholder:p-1 p-3 focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-orange))]"
+                    className="h-12 rounded-md bg-background/70 px-3 focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-orange))]"
                   />
                 </div>
                 <div className="space-y-2">
@@ -88,7 +88,7 @@ const VoterLogin = () => {
                     value={token}
                     onChange={(e) => setToken(e.target.value)}
                     required
-                    className="h-12 placeholder:p-1 p-3 rounded-md bg-background/70 tracking-widest focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-orange))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    className="h-12 px-3 rounded-md bg-background/70 tracking-widest focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-orange))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   />
                 </div>
                 <Button
