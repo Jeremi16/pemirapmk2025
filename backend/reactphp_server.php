@@ -25,7 +25,7 @@ use Psr\Http\Message\ServerRequestInterface;
 // =====================================================
 // KONFIGURASI DATABASE
 // =====================================================
-$dbConfig = 'root:@localhost/pemilu_mahasiswa'; // user:password@host/database
+$dbConfig = 'root:@localhost:3306/pemilu_mahasiswa'; // user:password@host/database
 
 // =====================================================
 // INISIALISASI EVENT LOOP & DATABASE CONNECTION
@@ -159,6 +159,10 @@ function handleAdminLogin(ServerRequestInterface $request, ConnectionInterface $
             $username = $data['username'] ?? '';
             $password = $data['password'] ?? '';
 
+            if ($username === '' || $password === '') {
+                return jsonResponse(['success' => false, 'message' => 'Username dan password wajib diisi'], 400);
+            }
+
             return $db->query(
                 'SELECT id, username, password FROM admin WHERE username = ?',
                 [$username]
@@ -168,12 +172,30 @@ function handleAdminLogin(ServerRequestInterface $request, ConnectionInterface $
                 }
 
                 $admin = $result->resultRows[0];
-                if (!password_verify($password, $admin['password'])) {
+                $stored = $admin['password'];
+
+                // Determine stored scheme and verify
+                $isBcryptOrArgon = str_starts_with($stored, '$2y$') || str_starts_with($stored, '$2a$') || str_starts_with($stored, '$argon2');
+                $isSha256Hex = preg_match('/^[a-f0-9]{64}$/i', $stored) === 1;
+
+                $valid = false;
+                if ($isBcryptOrArgon) {
+                    // Modern hash (bcrypt/argon2)
+                    $valid = password_verify($password, $stored);
+                } elseif ($isSha256Hex) {
+                    // Legacy SHA-256 hex stored in DB
+                    $valid = hash_equals($stored, hash('sha256', $password)) || hash_equals($stored, $password);
+                } else {
+                    // Legacy plaintext in DB
+                    $valid = hash_equals($stored, $password);
+                }
+
+                if (!$valid) {
                     return jsonResponse(['success' => false, 'message' => 'Password salah'], 401);
                 }
 
-                // Generate simple token (untuk production, gunakan JWT)
-                $token = bin2hex(random_bytes(32));
+                // Generate token sederhana
+                $token = bin2hex(random_bytes(16));
 
                 return jsonResponse([
                     'success' => true,
@@ -186,7 +208,6 @@ function handleAdminLogin(ServerRequestInterface $request, ConnectionInterface $
             return jsonResponse(['success' => false, 'message' => 'Database error'], 500);
         });
 }
-
 /**
  * ENDPOINT: GET /api/admin/stats
  * Statistik untuk admin dashboard
