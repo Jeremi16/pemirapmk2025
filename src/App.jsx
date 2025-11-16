@@ -8,7 +8,6 @@ import VoterLogin from "./pages/VoterLogin";
 import VotingPage from "./pages/VotingPage";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
-import AdminVoters from "./pages/AdminVoters";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,7 +24,6 @@ const App = () => (
           <Route path="/voting" element={<VotingPage />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/voters" element={<AdminVoters />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

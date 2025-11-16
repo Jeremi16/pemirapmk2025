@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,13 @@ const VoterLogin = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const id = localStorage.getItem("voter_id");
+    if (id) {
+      navigate("/voting", { replace: true });
+    }
+  }, [navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -37,6 +44,7 @@ const VoterLogin = () => {
       if (data.success) {
         localStorage.setItem("voter_id", data.voter_id);
         localStorage.setItem("voter_nim", nim);
+        localStorage.setItem("voter_name", data.voter_name);
         toast.success("Login berhasil!");
         navigate("/voting");
       } else {

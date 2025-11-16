@@ -58,6 +58,13 @@ const AdminDashboard = () => {
     fetchVoters();
   }, []);
 
+  useEffect(()=>{
+    const admin_token = localStorage.getItem("admin_token");
+    if(!admin_token){
+      navigate("/admin", { replace: true });
+    }
+  }, [navigate]);
+
   const fetchVoters = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/admin/voters` , {

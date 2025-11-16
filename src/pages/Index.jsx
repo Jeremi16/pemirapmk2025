@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Navbar from "@/components/Navbar";
 import {
   Card,
   CardContent,
@@ -13,7 +14,6 @@ import { API_BASE_URL } from "../config/api";
 
 const Index = () => {
   const navigate = useNavigate();
-  const [hovered, setHovered] = useState(null);
   const [candidates, setCandidates] = useState([]);
   const [candLoading, setCandLoading] = useState(true);
   const [candError, setCandError] = useState(null);
@@ -109,73 +109,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-secondary">
-      <nav className="fixed top-0 w-full bg-background backdrop-blur-lg border-b border-border z-50">
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="flex justify-between items-center h-20">
-            <div className="flex items-center space-x-4">
-              <a href="/" className="flex items-center space-x-2">
-                <div className="rounded-xl">
-                  <img
-                    src="https://res.cloudinary.com/dm3zixaz4/image/upload/v1763313569/Logo_Utama_dxucb5.png"
-                    alt="Logo"
-                    className="h-14 w-auto object-contain"
-                  />
-                </div>
-                <div className="flex flex-col leading-none">
-                  <div className="text-xl text-primary leading-none">
-                    PEMIRA
-                  </div>
-                  <span className="text-sm font-semibold text-[hsl(var(--brand-orange))] -mt-1">
-                    PMK ITERA 2025
-                  </span>
-                </div>
-              </a>
-            </div>
-            <div className="flex items-center space-x-8">
-              <a
-                href="#beranda"
-                className="py-2 font-semibold text-foreground hover:text-primary transition-colors relative group"
-              >
-                Beranda
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-              </a>
-              <a
-                href="#kandidat"
-                className="py-2 font-medium text-muted-foreground hover:text-primary transition-colors relative group"
-              >
-                Kandidat
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-              </a>
-              <a
-                href="#timeline"
-                className="py-2 font-medium text-muted-foreground hover:text-primary transition-colors relative group"
-              >
-                Timeline
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-              </a>
-              <a
-                href="#tentang"
-                className="py-2 font-medium text-muted-foreground hover:text-primary transition-colors relative group"
-              >
-                Tentang
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-              </a>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Button
-                variant="ghost"
-                size="default"
-                onClick={() => navigate("/voter")}
-                className="font-medium px-4 py-3 text-base transition-all ease-in-out flex rounded-lg text-white bg-[hsl(var(--accent))] hover:translate-y-[-3px]"
-              >
-                <Users className="w-4 h-4 mr-1" />
-                Login
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
+      <Navbar />
       <div className="HeroSection" id="beranda">
         {/* Hero */}
         <section className="flex justify-between items-center hero-padding">
@@ -436,17 +370,6 @@ const Index = () => {
                           )}
                         </ul>
                       </details>
-                    </div>
-
-                    {/* ===== BAGIAN CALL TO ACTION (LEBIH INTERAKTIF) ===== */}
-                    <div className="mt-6 pt-4 border-t border-gray-100 text-center">
-                      <a
-                        // Arahkan ke halaman detail, misal /pemira/kandidat/1
-                        href={`/pemira/kandidat/${c.id}`}
-                        className="inline-block w-full bg-[#924603] text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-[#7a3a02] transition-colors duration-200"
-                      >
-                        Lihat Profil Lengkap
-                      </a>
                     </div>
                   </div>
                 </div>

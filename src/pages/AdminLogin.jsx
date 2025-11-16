@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,16 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const admin_token = localStorage.getItem("admin_token");
+
+    if (admin_token && location.pathname !== "/admin/dashboard") {
+      navigate("/admin/dashboard", { replace: true });
+    }else if(!admin_token && location.pathname !== "/admin"){
+      navigate("/admin", { replace: true });
+    }
+  }, [navigate, location.pathname]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -74,7 +84,7 @@ const AdminLogin = () => {
               <div className="mt-8 flex justify-center">
                 <div className="w-56 h-56 bg-white/90 rounded-full flex items-center justify-center shadow-xl overflow-hidden">
                   <img
-                    src="Logo Utama.png"
+                    src="https://res.cloudinary.com/dm3zixaz4/image/upload/v1763313569/Logo_Utama_dxucb5.png"
                     alt="Logo Pemira PMK"
                     width={180}
                     height={180}

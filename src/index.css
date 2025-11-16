@@ -8,14 +8,14 @@ All colors MUST be HSL.
 
 @font-face {
   font-family: "ArchivoVar";
-  src: url("/Archivo-VariableFont_wdth,wght.ttf") format("truetype");
+  src: url("https://res.cloudinary.com/dm3zixaz4/raw/upload/v1763313569/Archivo-VariableFont_wdth_wght_pfwhir.ttf") format("truetype");
   font-weight: 100 900;        
   font-stretch: 75% 125%;       
   font-display: swap;
 }
 @font-face {
   font-family: "ArchivoItalic";
-  src: url("/Archivo-Italic-VariableFont_wdth,wght.ttf") format("truetype");
+  src: url("https://res.cloudinary.com/dm3zixaz4/raw/upload/v1763313569/Archivo-Italic-VariableFont_wdth_wght_xygrfh.ttf") format("truetype");
   font-weight: 100 900;
   font-stretch: 75% 125%;
   font-display: swap;

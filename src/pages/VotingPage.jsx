@@ -14,12 +14,20 @@ const VotingPage = () => {
   const [voting, setVoting] = useState(false);
   const [voteComplete, setVoteComplete] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [logoutSeconds, setLogoutSeconds] = useState(10);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchCandidates();
   }, []);
+
+  useEffect(() => {
+    const id = localStorage.getItem("voter_id");
+    if (!id) {
+      navigate("/voter", { replace: true });
+    }
+  }, [navigate]);
 
   const fetchCandidates = async () => {
     try {
@@ -37,12 +45,20 @@ const VotingPage = () => {
     }
   };
 
+  // Auto-logout helper
+  const performLogout = () => {
+    localStorage.removeItem("voter_id");
+    localStorage.removeItem("voter_nim");
+    localStorage.removeItem("voter_name");
+    navigate("/voter");
+  };
+
   const handleConfirmVote = async () => {
     setVoting(true);
     const voterId = localStorage.getItem("voter_id");
 
     try {
-      const response = await fetch("http://localhost:8080/api/vote", {
+      const response = await fetch(`${API_BASE_URL}/api/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -54,16 +70,12 @@ const VotingPage = () => {
       const data = await response.json();
 
       if (data.success) {
+        setConfirmOpen(false);
         setVoteComplete(true);
+        setLogoutSeconds(60);
         toast.success("Terima kasih! Suara Anda telah tercatat.", {
-          duration: 5000,
+          duration: 3000,
         });
-
-        setTimeout(() => {
-          localStorage.removeItem("voter_id");
-          localStorage.removeItem("voter_nim");
-          navigate("/voter");
-        }, 3000);
       } else {
         toast.error(
           data.message || "Gagal menyimpan suara. Silakan coba lagi."
@@ -87,20 +99,44 @@ const VotingPage = () => {
     }
   }, [confirmOpen]);
 
+  // Start countdown when voteComplete is true
+  useEffect(() => {
+    if (!voteComplete) return;
+    const id = setInterval(() => {
+      setLogoutSeconds((s) => s - 1);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [voteComplete]);
+
+  // Perform logout once countdown finishes
+  useEffect(() => {
+    if (voteComplete && logoutSeconds <= 0) {
+      performLogout();
+    }
+  }, [voteComplete, logoutSeconds]);
+
   const selectedDetail = candidates.find((x) => x.id === selectedCandidate);
 
   if (voteComplete) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f1c662d3] to-[#511600a1] p-4">
         <Card className="w-full max-w-md text-center border-success/50">
           <CardContent className="pt-12 pb-12">
             <CheckCircle2 className="w-20 h-20 mx-auto text-secondary mb-6" />
             <h2 className="text-3xl font-bold text-secondary mb-4">
               Suara Tercatat!
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg text-muted-foreground" aria-live="polite">
               Terima kasih atas partisipasi Anda dalam Pemilu Mahasiswa.
+              Otomatis logout dalam {logoutSeconds} detik.
             </p>
+            <Button
+              className="mt-6"
+              variant="secondary"
+              onClick={performLogout}
+            >
+              Logout sekarang
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -133,11 +169,11 @@ const VotingPage = () => {
                 key={c.id}
                 className="group rounded-xl border bg-white shadow hover:shadow-lg transition flex flex-col overflow-hidden"
               >
-                <div className="relative">
+                <div className="relative flex justify-center">
                   <img
                     src={c.foto_url}
                     alt={c.nama}
-                    className="h-auto w-full object-center"
+                    className="h-auto w-72 rounded-3xl p-3"
                     onError={(e) => {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = "/Aset-03.png";
@@ -217,17 +253,19 @@ const VotingPage = () => {
               <h2 className="text-2xl font-semibold mb-4">
                 Konfirmasi Pilihan
               </h2>
-              <div className="text-base text-muted-foreground space-y-3">
+              <div className="text-base text-primary space-y-3">
                 <p>
                   Anda memilih{" "}
-                  <strong>Kandidat Pasangan {selectedCandidate || "-"}</strong>.
+                  <strong>Kandidat {selectedCandidate || "-"}</strong>.
                 </p>
                 {selectedDetail && (
-                  <div className="rounded-md border p-3 text-sm">
-                    <p className="font-semibold">{selectedDetail.nama}</p>
-                    <p className="italic mt-1">
-                      Visi: {selectedDetail.visi?.[0] || "Tidak tersedia"}
-                    </p>
+                  <div className="rounded-md text-center border">
+                    <img
+                      src={selectedDetail.foto_url}
+                      className="w-auto h-auto rounded-md"
+                      alt={selectedDetail.nama}
+                    />
+                    <p className="font-semibold pt-3">{selectedDetail.nama}</p>
                   </div>
                 )}
                 <p>
