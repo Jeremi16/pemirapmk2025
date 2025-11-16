@@ -286,6 +286,65 @@ function handleAdminVoters(ConnectionInterface $db) {
         });
 }
 
+/**
+ * ENDPOINT: GET /api/candidates
+ * Mengambil data seluruh kandidat
+ */
+function handleCandidates(ConnectionInterface $db) {
+    return $db->query('SELECT * FROM `kandidat` ORDER BY id')
+        ->then(function($result) {
+            $rows = $result->resultRows;
+            $split = function($text) {
+                if ($text === null) return [];
+                $parts = preg_split('/\r\n|\n|\|/', trim($text));
+                return array_values(array_filter(array_map('trim', $parts), fn($v)=>$v!==''));
+            };
+            $candidates = array_map(function($r) use ($split) {
+                return [
+                    'id' => (int)$r['id'],
+                    'nama' => $r['nama'],
+                    'no_urut' => $r['nomor_urut'],
+                    'prodi' => $r['prodi'],
+                    'angkatan' => $r['angkatan'],
+                    'foto_url' => $r['foto_url'],
+                    'visi' => $split($r['visi']),
+                    'misi' => $split($r['misi']),
+                ];
+            }, $rows);
+
+            return jsonResponse(['success'=>true,'candidates'=>$candidates]);
+        })
+        ->otherwise(function($e){
+            // Fallback jika table belum tersedia
+            return jsonResponse([
+                'success'=>true,
+                'warning'=>'Fallback digunakan: '.$e->getMessage(),
+                'candidates'=>[
+                    [
+                        'id'=>1,
+                        'nama'=>'Kandidat 1',
+                        'no_urut'=>'1',
+                        'foto_url'=>'kandidat1.jpg',
+                        'prodi' => 'Program Studi',
+                        'angkatan' => 'Angkatan',
+                        'visi'=>['Meningkatkan partisipasi'],
+                        'misi'=>['Transparansi','Kolaborasi']
+                    ],
+                    [
+                        'id'=>2,
+                        'nama'=>'Kandidat 2',
+                        'no_urut'=>'2',
+                        'foto_url'=>'kandidat2.jpg',
+                        'prodi'=> 'Program Studi',
+                        'angkatan'=>'Angkatan',
+                        'visi'=>['Penguatan pelayanan'],
+                        'misi'=>['Digitalisasi','Kaderisasi']
+                    ]
+                ]
+            ]);
+        });
+}
+
 // =====================================================
 // ROUTER UTAMA
 // =====================================================
@@ -319,6 +378,10 @@ $server = new HttpServer(function (ServerRequestInterface $request) use ($db) {
         return handleAdminVoters($db);
     }
 
+    if ($method === 'GET' && $path === '/api/candidates') {
+        return handleCandidates($db);
+    }
+
     // 404 Not Found
     return jsonResponse(['error' => 'Endpoint not found'], 404);
 });
@@ -336,4 +399,5 @@ echo "   POST /api/vote\n";
 echo "   POST /api/admin/login\n";
 echo "   GET  /api/admin/stats\n";
 echo "   GET  /api/admin/voters\n";
+echo "   GET  /api/candidates\n";
 echo "\nTekan Ctrl+C untuk berhenti.\n";

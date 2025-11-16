@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { MoveLeft } from "lucide-react";
+import { API_BASE_URL } from "../config/api";
 
 const AdminLogin = () => {
   const [username, setUsername] = useState("");
@@ -29,7 +30,7 @@ const AdminLogin = () => {
         password, // plaintext; backend will verify against stored hash
       };
 
-      const response = await fetch("http://localhost:8080/api/admin/login", {
+      const response = await fetch(`${API_BASE_URL}/api/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { MoveLeft } from "lucide-react";
+import { API_BASE_URL } from "../config/api";
 
 const VoterLogin = () => {
   const [nim, setNim] = useState("");
@@ -25,7 +26,7 @@ const VoterLogin = () => {
 
     try {
       // Call ReactPHP backend API
-      const response = await fetch("http://localhost:8080/api/voter/login", {
+      const response = await fetch(`${API_BASE_URL}/api/voter/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nim, token }),

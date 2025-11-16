@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   BarChart,
   Bar,
@@ -24,7 +25,18 @@ import {
 import { Users, CheckCircle, XCircle, TrendingUp, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Search } from "lucide-react";
 import AdminSidebar from "@/components/AdminSidebar";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { API_BASE_URL } from "../config/api";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -36,7 +48,48 @@ const AdminDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("candidates");
+  const [voters, setVoters] = useState([]);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // added
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchVoters();
+  }, []);
+
+  const fetchVoters = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/voters` , {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+        },
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setVoters(data.voters);
+      }
+    } catch (error) {
+      console.error("Failed to fetch voters:", error);
+    }
+  };
+
+  const filteredVoters = voters.filter((voter) => {
+    const matchesSearch =
+      voter.nim.toLowerCase().includes(search.toLowerCase()) ||
+      voter.name.toLowerCase().includes(search.toLowerCase());
+
+    const matchesFilter =
+      filter === "all" ||
+      (filter === "voted" && voter.hasVoted) ||
+      (filter === "not-voted" && !voter.hasVoted);
+
+    return matchesSearch && matchesFilter;
+  });
+
+  const votedCount = voters.filter((v) => v.hasVoted).length;
+  const notVotedCount = voters.length - votedCount;
 
   useEffect(() => {
     fetchStats();
@@ -102,6 +155,8 @@ const AdminDashboard = () => {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           handleLogout={handleLogout}
+          collapsed={sidebarCollapsed} // added
+          onToggle={() => setSidebarCollapsed((v) => !v)} // added
         />
         <div className="flex-1 max-w-7xl mx-auto py-8 px-4">
           <div className="grid md:grid-cols-4 gap-6 mb-8">
@@ -299,6 +354,105 @@ const AdminDashboard = () => {
                         />
                       </BarChart>
                     </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="voters" className="space-y-6">
+              <div className="grid grid-cols-1">
+                <Card className="shadow-lg pt-5 px-5 pb-3">
+                  <CardHeader className="pb-3">
+                    <CardTitle>Daftar Lengkap Data Pemilih</CardTitle>
+                    <CardDescription>
+                      Filter dan cari data pemilih
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col sm:flex-row gap-4 pb-3">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Cari NIM atau nama..."
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant={filter === "all" ? "default" : "outline"}
+                          onClick={() => setFilter("all")}
+                        >
+                          Semua
+                        </Button>
+                        <Button
+                          variant={filter === "voted" ? "default" : "outline"}
+                          onClick={() => setFilter("voted")}
+                        >
+                          Sudah Pilih
+                        </Button>
+                        <Button
+                          variant={
+                            filter === "not-voted" ? "default" : "outline"
+                          }
+                          onClick={() => setFilter("not-voted")}
+                        >
+                          Belum Pilih
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="border rounded-lg">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>NIM</TableHead>
+                            <TableHead>Nama</TableHead>
+                            <TableHead>Fakultas</TableHead>
+                            <TableHead>Program Studi</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Waktu Memilih</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredVoters.map((voter) => (
+                            <TableRow key={voter.nim}>
+                              <TableCell className="font-medium">
+                                {voter.nim}
+                              </TableCell>
+                              <TableCell>{voter.name}</TableCell>
+                              <TableCell>{voter.faculty}</TableCell>
+                              <TableCell>{voter.program}</TableCell>
+                              <TableCell>
+                                {voter.hasVoted ? (
+                                  <Badge
+                                    variant="default"
+                                    className="bg-success p-2"
+                                  >
+                                    Sudah Memilih
+                                  </Badge>
+                                ) : (
+                                  <Badge
+                                    variant="secondary"
+                                    className="bg-secondary p-2"
+                                  >
+                                    Belum Memilih
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell>{voter.votedAt || "-"}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {filteredVoters.length === 0 && (
+                      <div className="text-center py-12 text-muted-foreground">
+                        Tidak ada data pemilih yang sesuai dengan filter
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>

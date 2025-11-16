@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config/api";
 
 const AdminVoters = () => {
   const [voters, setVoters] = useState([]);
@@ -19,7 +20,7 @@ const AdminVoters = () => {
 
   const fetchVoters = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/admin/voters", {
+      const response = await fetch(`${API_BASE_URL}/api/admin/voters`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
@@ -52,21 +53,6 @@ const AdminVoters = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-6 px-4 shadow-lg">
-        <div className="max-w-7xl mx-auto">
-          <Button
-            variant="secondary"
-            onClick={() => navigate("/admin/dashboard")}
-            className="mb-4 gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Kembali ke Dashboard
-          </Button>
-          <h1 className="text-3xl font-bold">Daftar Pemilih</h1>
-          <p className="text-primary-foreground/80 mt-1">Kelola dan monitor status pemilih</p>
-        </div>
-      </header>
-
       <div className="max-w-7xl mx-auto py-8 px-4">
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card>
