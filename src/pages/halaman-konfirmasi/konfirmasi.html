@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pemira PMK 2025</title>
+        <link rel="shortcut icon" href="img/Logo Utama.png" type="image/x-icon">
+        <link rel="stylesheet" href="style.css">
+
+    </head>
+
+    <body>
+        <div class="header" id="myHeader">
+            <img style="height: 70px;" src="img/Logo Gabungan.png">
+        </div>
+
+        <div class="container-kandidat">
+            <div class="card" id="calon-1">
+                <div class="foto-placeholder">
+                    <img src="" alt="Foto kandidat 1">
+                </div> 
+                <h3 class="nama-kandidat">Nama</h3>
+                <button class="btn-pilih" onclick="openPopup(this)">Pilih</button>
+            </div>
+
+            <div class="card" id="calon-2">
+                <div class="foto-placeholder">
+                    <img src="" alt="Foto kandidat 2">
+                </div>
+                <h3 class="nama-kandidat">Nama</h3>
+                <button class="btn-pilih" onclick="openPopup(this)">Pilih</button>
+            </div>
+        </div>
+
+        <div class="popup" id="popup">
+            <h3>Apakah Anda yakin memilih kandidat ini?</h3>
+            
+            <div id="preview-kandidat"></div>
+
+            <div class="flex">
+                <div class="flex-item">
+                    <button type="button" onclick="closePopup()" class="btn-popup btn-batal">Batal</button>
+                </div>
+                <form action="logout.html" class="flex-item">
+                    <button type="submit" class="btn-popup btn-yakin">Yakin</button>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            let popup = document.getElementById("popup");
+            let previewArea = document.getElementById("preview-kandidat");
+
+            function openPopup(tombol) {
+                let kartuAsli = tombol.parentElement;
+                let kartuClone = kartuAsli.cloneNode(true);
+                let tombolDiClone = kartuClone.querySelector(".btn-pilih");
+                if (tombolDiClone) {
+                    tombolDiClone.remove();
+                }
+
+                previewArea.innerHTML = "";
+                previewArea.appendChild(kartuClone);
+                popup.classList.add("open-popup");
+            }
+
+            function closePopup() {
+                popup.classList.remove("open-popup");
+            }           
+        </script>
+
+    </body>
+</html>
