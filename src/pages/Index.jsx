@@ -116,7 +116,7 @@ const Index = () => {
               <a href="/" className="flex items-center space-x-2">
                 <div className="rounded-xl">
                   <img
-                    src="Logo Utama.png"
+                    src="https://res.cloudinary.com/dm3zixaz4/image/upload/v1763313569/Logo_Utama_dxucb5.png"
                     alt="Logo"
                     className="h-14 w-auto object-contain"
                   />
@@ -175,6 +175,7 @@ const Index = () => {
           </div>
         </div>
       </nav>
+
       <div className="HeroSection" id="beranda">
         {/* Hero */}
         <section className="flex justify-between items-center hero-padding">
@@ -233,7 +234,7 @@ const Index = () => {
                   {/* Lingkaran dengan Gradient Lembut */}
                   <div className="w-96 h-96 rounded-full bg-gradient-to-br from-[#F1C762] to-[#FAEBC8] border-8 border-white shadow-2xl flex items-center justify-center">
                     <img
-                      src="Logo Utama.png"
+                      src="https://res.cloudinary.com/dm3zixaz4/image/upload/v1763313569/Logo_Utama_dxucb5.png"
                       alt="Logo Pemira"
                       className="w-64 h-auto object-contain drop-shadow-lg"
                     />
@@ -387,7 +388,7 @@ const Index = () => {
                   <div className="relative">
                     <img
                       // Gunakan placeholder profil jika foto tidak ada
-                      src={c.foto_url || "Aset-03.png"}
+                      src={c.foto_url}
                       alt={c.nama}
                       className="h-full w-full"
                       onError={(e) => (e.currentTarget.src = c.foto_url)}
@@ -423,7 +424,7 @@ const Index = () => {
                       </div>
 
                       {/* Misi (Dibuat kolapsibel/collapsible) */}
-                      <details className="text-base" open>
+                      <details className="text-base">
                         <summary className="font-semibold text-[#924603] cursor-pointer hover:underline">
                           Lihat Misi
                         </summary>
@@ -646,7 +647,7 @@ const Index = () => {
             <div className="col-span-1">
               <div className="flex items-center space-x-3 mb-4">
                 <img
-                  src="Logo Utama.png"
+                  src="https://res.cloudinary.com/dm3zixaz4/image/upload/v1763313569/Logo_Utama_dxucb5.png"
                   alt="Logo"
                   className="h-12 w-auto object-contain"
                 />

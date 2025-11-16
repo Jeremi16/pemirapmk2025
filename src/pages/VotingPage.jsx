@@ -108,13 +108,13 @@ const VotingPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#f1c662d3] to-[#511600a1] py-12 px-4">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-primary mb-3">
             Surat Suara Elektronik
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-[#511600a1]">
             Pilih salah satu pasangan kandidat
           </p>
         </div>
@@ -135,9 +135,9 @@ const VotingPage = () => {
               >
                 <div className="relative">
                   <img
-                    src={c.foto_url || "/Aset-03.png"}
+                    src={c.foto_url}
                     alt={c.nama}
-                    className="h-56 object-cover w-full object-center"
+                    className="h-auto w-full object-center"
                     onError={(e) => {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = "/Aset-03.png";
@@ -167,7 +167,7 @@ const VotingPage = () => {
                       </blockquote>
                     </div>
 
-                    <details className="text-base" open>
+                    <details className="text-base">
                       <summary className="font-semibold text-[#924603] cursor-pointer hover:underline">
                         Lihat Misi
                       </summary>

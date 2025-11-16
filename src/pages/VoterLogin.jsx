@@ -119,7 +119,7 @@ const VoterLogin = () => {
               <div className="mt-8 flex justify-center">
                 <div className="w-56 h-56 bg-white/90 rounded-full flex items-center justify-center shadow-xl overflow-hidden">
                   <img
-                    src="Logo Utama.png"
+                    src="https://res.cloudinary.com/dm3zixaz4/image/upload/v1763313569/Logo_Utama_dxucb5.png"
                     alt="Logo Pemira PMK"
                     width={180}
                     height={180}
