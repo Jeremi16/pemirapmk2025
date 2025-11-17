@@ -1,17 +1,15 @@
 <?php
 /**
  * =====================================================
- * CONTOH BACKEND REACTPHP UNTUK PEMILU MAHASISWA
+ * BACKEND REACTPHP UNTUK PEMILU MAHASISWA
+ * Production Ready untuk api.jdrive.web.id
+ * (Diperbaiki: DSN aman, error logging ke file, forced DB check via SELECT 1)
  * =====================================================
- * 
- * Install dependencies:
- * composer require react/http react/mysql react/promise
- * 
- * Jalankan server:
- * php reactphp_server.php
- * 
- * Server akan berjalan di: http://localhost:8080
  */
+
+// Debug bootstrap marker (membantu mengetahui apakah file dieksekusi)
+echo "BOOT: starting reactphp_server.php\n";
+flush();
 
 require __DIR__ . '/vendor/autoload.php';
 
@@ -23,215 +21,250 @@ use React\MySQL\ConnectionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 // =====================================================
-// KONFIGURASI DATABASE
+// DEBUG / LOGGING (sementara — matikan display_errors di production)
 // =====================================================
-$dbConfig = 'root:@localhost:3306/pemilu_mahasiswa'; // user:password@host/database
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+ini_set('error_log', __DIR__ . '/reactphp_error.log');
+error_reporting(E_ALL);
 
 // =====================================================
-// INISIALISASI EVENT LOOP & DATABASE CONNECTION
+// KONFIGURASI (pisahkan kredensial sensitif jika memungkinkan)
+// =====================================================
+$dbUser = 'pemirap1_atmin';
+$dbPass = 't&psHAIQE[a(];*R'; // ganti sesuai real password
+$dbHost = 'localhost';
+$dbPort = '3306';
+$dbName = 'pemirap1_pemilu_mahasiswa';
+
+$config = [
+    // db akan dibentuk di bawah dengan rawurlencode untuk password
+    'port' => getenv('PORT') ?: 8080,
+    'host' => '0.0.0.0',
+    'allowed_origins' => [
+        'https://jdrive.web.id',
+        'https://www.jdrive.web.id',
+        'https://api.jdrive.web.id'
+    ]
+];
+
+// bangun DSN aman (encode password agar karakter spesial tidak merusak DSN)
+$config['db'] = sprintf('%s:%s@%s:%s/%s',
+    $dbUser,
+    rawurlencode($dbPass),
+    $dbHost,
+    $dbPort,
+    $dbName
+);
+
+// =====================================================
+// INISIALISASI
 // =====================================================
 $mysql = new MySQLFactory();
-$db = $mysql->createLazyConnection($dbConfig);
+$db = $mysql->createLazyConnection($config['db']);
+
+// Force a simple query once to verify connection (LazyConnection doesn't have connect())
+$db->query('SELECT 1')->then(function ($result) {
+    error_log("MySQL: connected successfully");
+}, function ($e) {
+    error_log("MySQL connect failed: " . ($e instanceof \Throwable ? $e->getMessage() : json_encode($e)));
+});
 
 // =====================================================
 // HELPER FUNCTIONS
 // =====================================================
+function jsonResponse($data, $status = 200, $origin = null) {
+    global $config;
 
-function jsonResponse($data, $status = 200) {
+    $allowedOrigin = '*';
+    if ($origin && in_array($origin, $config['allowed_origins'], true)) {
+        $allowedOrigin = $origin;
+    }
+
     return new Response(
         $status,
         [
             'Content-Type' => 'application/json',
-            'Access-Control-Allow-Origin' => '*', // CORS untuk frontend
+            'Access-Control-Allow-Origin' => $allowedOrigin,
             'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers' => 'Content-Type, Authorization'
+            'Access-Control-Allow-Headers' => 'Content-Type, Authorization',
+            'Access-Control-Allow-Credentials' => 'true',
+            'X-Content-Type-Options' => 'nosniff',
+            'X-Frame-Options' => 'DENY',
+            'X-XSS-Protection' => '1; mode=block'
         ],
-        json_encode($data)
+        json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
     );
 }
 
-function handleCORS() {
+function handleCORS($origin = null) {
+    global $config;
+
+    $allowedOrigin = '*';
+    if ($origin && in_array($origin, $config['allowed_origins'], true)) {
+        $allowedOrigin = $origin;
+    }
+
     return new Response(200, [
-        'Access-Control-Allow-Origin' => '*',
+        'Access-Control-Allow-Origin' => $allowedOrigin,
         'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers' => 'Content-Type, Authorization'
+        'Access-Control-Allow-Headers' => 'Content-Type, Authorization',
+        'Access-Control-Allow-Credentials' => 'true'
     ]);
+}
+
+function logRequest($method, $path, $ip) {
+    $timestamp = date('Y-m-d H:i:s');
+    echo "[{$timestamp}] {$method} {$path} - {$ip}\n";
 }
 
 // =====================================================
 // ENDPOINT HANDLERS
 // =====================================================
-
-/**
- * ENDPOINT: POST /api/voter/login
- * Login pemilih dengan NIM dan Token
- */
-function handleVoterLogin(ServerRequestInterface $request, ConnectionInterface $db) {
+function handleVoterLogin(ServerRequestInterface $request, ConnectionInterface $db, $origin) {
     return \React\Promise\resolve($request->getBody()->getContents())
-        ->then(function ($body) use ($db) {
+        ->then(function ($body) use ($db, $origin) {
             $data = json_decode($body, true);
-            $nim = $data['nim'] ?? '';
-            $token = $data['token'] ?? '';
+            $nim = trim($data['nim'] ?? '');
+            $token = trim($data['token'] ?? '');
 
             if (empty($nim) || empty($token)) {
-                return jsonResponse(['success' => false, 'message' => 'NIM dan Token wajib diisi'], 400);
+                return jsonResponse(['success' => false, 'message' => 'NIM dan Token wajib diisi'], 400, $origin);
             }
 
-            // Query async: cek pemilih
             return $db->query(
                 'SELECT id, nim, nama, sudah_memilih FROM pemilih WHERE nim = ? AND token = ?',
                 [$nim, $token]
-            )->then(function ($result) {
+            )->then(function ($result) use ($origin) {
                 if (empty($result->resultRows)) {
-                    return jsonResponse(['success' => false, 'message' => 'NIM atau Token salah'], 401);
+                    return jsonResponse(['success' => false, 'message' => 'NIM atau Token salah'], 401, $origin);
                 }
 
                 $voter = $result->resultRows[0];
 
-                if ($voter['sudah_memilih'] == 1) {
-                    return jsonResponse(['success' => false, 'message' => 'Token sudah digunakan'], 403);
+                if (!empty($voter['sudah_memilih']) && $voter['sudah_memilih'] == 1) {
+                    return jsonResponse(['success' => false, 'message' => 'Token sudah digunakan'], 403, $origin);
                 }
 
                 return jsonResponse([
                     'success' => true,
                     'voter_id' => $voter['id'],
                     'voter_name' => $voter['nama']
-                ]);
+                ], 200, $origin);
             });
         })
-        ->otherwise(function ($error) {
-            return jsonResponse(['success' => false, 'message' => 'Database error: ' . $error->getMessage()], 500);
+        ->otherwise(function ($error) use ($origin) {
+            error_log("Login error: " . ($error instanceof \Throwable ? $error->getMessage() : json_encode($error)));
+            return jsonResponse(['success' => false, 'message' => 'Terjadi kesalahan server'], 500, $origin);
         });
 }
 
-/**
- * ENDPOINT: POST /api/vote
- * Simpan suara pemilih
- */
-function handleVote(ServerRequestInterface $request, ConnectionInterface $db) {
+function handleVote(ServerRequestInterface $request, ConnectionInterface $db, $origin) {
     return \React\Promise\resolve($request->getBody()->getContents())
-        ->then(function ($body) use ($db) {
+        ->then(function ($body) use ($db, $origin) {
             $data = json_decode($body, true);
-            $voterId = $data['voter_id'] ?? 0;
-            $candidateId = $data['candidate_id'] ?? 0;
+            $voterId = (int)($data['voter_id'] ?? 0);
+            $candidateId = (int)($data['candidate_id'] ?? 0);
 
             if (!$voterId || !$candidateId) {
-                return jsonResponse(['success' => false, 'message' => 'Data tidak lengkap'], 400);
+                return jsonResponse(['success' => false, 'message' => 'Data tidak lengkap'], 400, $origin);
             }
 
-            // Cek apakah sudah memilih
             return $db->query(
-                'SELECT sudah_memilih FROM pemilih WHERE id = ?',
+                'SELECT id, nim, nama, fakultas, program_studi, sudah_memilih FROM pemilih WHERE id = ?',
                 [$voterId]
-            )->then(function ($result) use ($db, $voterId, $candidateId) {
-                if (empty($result->resultRows) || $result->resultRows[0]['sudah_memilih'] == 1) {
-                    return jsonResponse(['success' => false, 'message' => 'Anda sudah memilih'], 403);
+            )->then(function ($result) use ($db, $voterId, $candidateId, $origin) {
+                if (empty($result->resultRows)) {
+                    return jsonResponse(['success' => false, 'message' => 'Pemilih tidak ditemukan'], 404, $origin);
                 }
 
-                // Insert vote
+                $pemilih = $result->resultRows[0];
+
+                if ($pemilih['sudah_memilih'] == 1) {
+                    return jsonResponse(['success' => false, 'message' => 'Anda sudah memilih'], 403, $origin);
+                }
+
+                $nim       = $pemilih['nim'];
+                $nama      = $pemilih['nama'];
+                $fakultas  = $pemilih['fakultas'];
+                $program   = $pemilih['program_studi'];
+
+                // Insert ke tabel suara sesuai struktur yang kamu pakai
                 return $db->query(
-                    'INSERT INTO suara (pemilih_id, kandidat_id) VALUES (?, ?)',
-                    [$voterId, $candidateId]
-                )->then(function () use ($db, $voterId) {
-                    // Update status pemilih
+                    'INSERT INTO suara (pemilih_id, nim, nama, fakultas, program_studi, kandidat_id, waktu_vote)
+                     VALUES (?, ?, ?, ?, ?, ?, NOW())',
+                    [$voterId, $nim, $nama, $fakultas, $program, $candidateId]
+                )->then(function () use ($db, $voterId, $origin) {
+
                     return $db->query(
                         'UPDATE pemilih SET sudah_memilih = TRUE, waktu_memilih = NOW() WHERE id = ?',
                         [$voterId]
-                    )->then(function () {
-                        return jsonResponse(['success' => true, 'message' => 'Suara berhasil disimpan']);
+                    )->then(function () use ($origin) {
+                        return jsonResponse(['success' => true, 'message' => 'Suara berhasil disimpan'], 200, $origin);
                     });
+
                 });
             });
         })
-        ->otherwise(function ($error) {
-            return jsonResponse(['success' => false, 'message' => 'Database error: ' . $error->getMessage()], 500);
+        ->otherwise(function ($error) use ($origin) {
+            error_log("Vote error: " . ($error instanceof \Throwable ? $error->getMessage() : json_encode($error)));
+            return jsonResponse(['success' => false, 'message' => 'Terjadi kesalahan server'], 500, $origin);
         });
 }
 
-/**
- * ENDPOINT: POST /api/admin/login
- * Login admin
- */
-function handleAdminLogin(ServerRequestInterface $request, ConnectionInterface $db) {
-    return \React\Promise\resolve($request->getBody()->getContents())
-        ->then(function ($body) use ($db) {
-            $data = json_decode($body, true);
-            $username = $data['username'] ?? '';
-            $password = $data['password'] ?? '';
 
-            if ($username === '' || $password === '') {
-                return jsonResponse(['success' => false, 'message' => 'Username dan password wajib diisi'], 400);
-            }
+function handleAdminLogin(ServerRequestInterface $request, ConnectionInterface $db, $origin) {
+    return \React\Promise\resolve($request->getBody()->getContents())
+        ->then(function ($body) use ($db, $origin) {
+            $data = json_decode($body, true);
+            $username = trim($data['username'] ?? '');
+            $password = $data['password'] ?? '';
 
             return $db->query(
                 'SELECT id, username, password FROM admin WHERE username = ?',
                 [$username]
-            )->then(function ($result) use ($password) {
+            )->then(function ($result) use ($password, $origin) {
                 if (empty($result->resultRows)) {
-                    return jsonResponse(['success' => false, 'message' => 'Username salah'], 401);
+                    return jsonResponse(['success' => false, 'message' => 'Username salah'], 401, $origin);
                 }
 
                 $admin = $result->resultRows[0];
-                $stored = $admin['password'];
 
-                // Determine stored scheme and verify
-                $isBcryptOrArgon = str_starts_with($stored, '$2y$') || str_starts_with($stored, '$2a$') || str_starts_with($stored, '$argon2');
-                $isSha256Hex = preg_match('/^[a-f0-9]{64}$/i', $stored) === 1;
-
-                $valid = false;
-                if ($isBcryptOrArgon) {
-                    // Modern hash (bcrypt/argon2)
-                    $valid = password_verify($password, $stored);
-                } elseif ($isSha256Hex) {
-                    // Legacy SHA-256 hex stored in DB
-                    $valid = hash_equals($stored, hash('sha256', $password)) || hash_equals($stored, $password);
-                } else {
-                    // Legacy plaintext in DB
-                    $valid = hash_equals($stored, $password);
+                if ($admin['password'] !== $password) {
+                    return jsonResponse(['success' => false, 'message' => 'Password salah'], 401, $origin);
                 }
 
-                if (!$valid) {
-                    return jsonResponse(['success' => false, 'message' => 'Password salah'], 401);
-                }
-
-                // Generate token sederhana
                 $token = bin2hex(random_bytes(16));
 
                 return jsonResponse([
                     'success' => true,
                     'token' => $token,
                     'username' => $admin['username']
-                ]);
+                ], 200, $origin);
             });
         })
-        ->otherwise(function ($error) {
-            return jsonResponse(['success' => false, 'message' => 'Database error'], 500);
+        ->otherwise(function ($error) use ($origin) {
+            error_log("Admin login error: " . ($error instanceof \Throwable ? $error->getMessage() : json_encode($error)));
+            return jsonResponse(['success' => false, 'message' => 'Terjadi kesalahan server'], 500, $origin);
         });
 }
-/**
- * ENDPOINT: GET /api/admin/stats
- * Statistik untuk admin dashboard
- */
-function handleAdminStats(ConnectionInterface $db) {
-    // Query multiple menggunakan Promise::all untuk parallel execution
+
+function handleAdminStats(ConnectionInterface $db, $origin) {
     return \React\Promise\all([
-        // Total suara per kandidat
         $db->query('SELECT kandidat_id, COUNT(*) as total FROM suara GROUP BY kandidat_id'),
-        // Total pemilih
         $db->query('SELECT 
             SUM(CASE WHEN sudah_memilih = TRUE THEN 1 ELSE 0 END) as voted,
             SUM(CASE WHEN sudah_memilih = FALSE THEN 1 ELSE 0 END) as not_voted
             FROM pemilih'),
-        // Partisipasi per fakultas
         $db->query('SELECT 
             fakultas as name,
             SUM(CASE WHEN sudah_memilih = TRUE THEN 1 ELSE 0 END) as voted,
             SUM(CASE WHEN sudah_memilih = FALSE THEN 1 ELSE 0 END) as notVoted
             FROM pemilih GROUP BY fakultas')
-    ])->then(function ($results) {
-        $candidateVotes = $results[0]->resultRows;
-        $participation = $results[1]->resultRows[0];
-        $facultyStats = $results[2]->resultRows;
+    ])->then(function (array $results) use ($origin) {
+        $candidateVotes = isset($results[0]) ? $results[0]->resultRows : [];
+        $participation = isset($results[1]) && !empty($results[1]->resultRows) ? $results[1]->resultRows[0] : ['voted' => 0, 'not_voted' => 0];
+        $facultyStats = isset($results[2]) ? $results[2]->resultRows : [];
 
         $candidate1 = 0;
         $candidate2 = 0;
@@ -246,25 +279,22 @@ function handleAdminStats(ConnectionInterface $db) {
             'stats' => [
                 'candidate1' => $candidate1,
                 'candidate2' => $candidate2,
-                'totalVoted' => (int)$participation['voted'],
-                'totalNotVoted' => (int)$participation['not_voted'],
+                'totalVoted' => (int)($participation['voted'] ?? 0),
+                'totalNotVoted' => (int)($participation['not_voted'] ?? 0),
                 'facultyStats' => $facultyStats
             ]
-        ]);
-    })->otherwise(function ($error) {
-        return jsonResponse(['success' => false, 'message' => 'Database error'], 500);
+        ], 200, $origin);
+    })->otherwise(function ($error) use ($origin) {
+        error_log("Stats error: " . ($error instanceof \Throwable ? $error->getMessage() : json_encode($error)));
+        return jsonResponse(['success' => false, 'message' => 'Terjadi kesalahan server'], 500, $origin);
     });
 }
 
-/**
- * ENDPOINT: GET /api/admin/voters
- * Daftar pemilih untuk admin
- */
-function handleAdminVoters(ConnectionInterface $db) {
+function handleAdminVoters(ConnectionInterface $db, $origin) {
     return $db->query('SELECT nim, nama as name, fakultas as faculty, program_studi as program, 
                        sudah_memilih as hasVoted, waktu_memilih as votedAt 
                        FROM pemilih ORDER BY nim')
-        ->then(function ($result) {
+        ->then(function ($result) use ($origin) {
             $voters = array_map(function($row) {
                 return [
                     'nim' => $row['nim'],
@@ -279,125 +309,79 @@ function handleAdminVoters(ConnectionInterface $db) {
             return jsonResponse([
                 'success' => true,
                 'voters' => $voters
-            ]);
+            ], 200, $origin);
         })
-        ->otherwise(function ($error) {
-            return jsonResponse(['success' => false, 'message' => 'Database error'], 500);
+        ->otherwise(function ($error) use ($origin) {
+            error_log("Voters error: " . ($error instanceof \Throwable ? $error->getMessage() : json_encode($error)));
+            return jsonResponse(['success' => false, 'message' => 'Terjadi kesalahan server'], 500, $origin);
         });
 }
 
-/**
- * ENDPOINT: GET /api/candidates
- * Mengambil data seluruh kandidat
- */
-function handleCandidates(ConnectionInterface $db) {
-    return $db->query('SELECT * FROM `kandidat` ORDER BY id')
-        ->then(function($result) {
-            $rows = $result->resultRows;
-            $split = function($text) {
-                if ($text === null) return [];
-                $parts = preg_split('/\r\n|\n|\|/', trim($text));
-                return array_values(array_filter(array_map('trim', $parts), fn($v)=>$v!==''));
-            };
-            $candidates = array_map(function($r) use ($split) {
-                return [
-                    'id' => (int)$r['id'],
-                    'nama' => $r['nama'],
-                    'no_urut' => $r['nomor_urut'],
-                    'prodi' => $r['prodi'],
-                    'angkatan' => $r['angkatan'],
-                    'foto_url' => $r['foto_url'],
-                    'visi' => $split($r['visi']),
-                    'misi' => $split($r['misi']),
-                ];
-            }, $rows);
-
-            return jsonResponse(['success'=>true,'candidates'=>$candidates]);
-        })
-        ->otherwise(function($e){
-            // Fallback jika table belum tersedia
-            return jsonResponse([
-                'success'=>true,
-                'warning'=>'Fallback digunakan: '.$e->getMessage(),
-                'candidates'=>[
-                    [
-                        'id'=>1,
-                        'nama'=>'Kandidat 1',
-                        'no_urut'=>'1',
-                        'foto_url'=>'kandidat1.jpg',
-                        'prodi' => 'Program Studi',
-                        'angkatan' => 'Angkatan',
-                        'visi'=>['Meningkatkan partisipasi'],
-                        'misi'=>['Transparansi','Kolaborasi']
-                    ],
-                    [
-                        'id'=>2,
-                        'nama'=>'Kandidat 2',
-                        'no_urut'=>'2',
-                        'foto_url'=>'kandidat2.jpg',
-                        'prodi'=> 'Program Studi',
-                        'angkatan'=>'Angkatan',
-                        'visi'=>['Penguatan pelayanan'],
-                        'misi'=>['Digitalisasi','Kaderisasi']
-                    ]
-                ]
-            ]);
-        });
+// Health check endpoint
+function handleHealthCheck($origin) {
+    return jsonResponse([
+        'status' => 'ok',
+        'timestamp' => date('Y-m-d H:i:s'),
+        'service' => 'Pemilu Mahasiswa API'
+    ], 200, $origin);
 }
 
 // =====================================================
-// ROUTER UTAMA
+// ROUTER
 // =====================================================
 $server = new HttpServer(function (ServerRequestInterface $request) use ($db) {
     $method = $request->getMethod();
     $path = $request->getUri()->getPath();
+    $origin = $request->getHeaderLine('Origin');
+
+    // Get client IP
+    $ip = $request->getServerParams()['REMOTE_ADDR'] ?? 'unknown';
+    logRequest($method, $path, $ip);
 
     // Handle CORS preflight
     if ($method === 'OPTIONS') {
-        return handleCORS();
+        return handleCORS($origin);
     }
 
-    // Route handling
-    if ($method === 'POST' && $path === '/api/voter/login') {
-        return handleVoterLogin($request, $db);
-    }
-    
-    if ($method === 'POST' && $path === '/api/vote') {
-        return handleVote($request, $db);
-    }
-    
-    if ($method === 'POST' && $path === '/api/admin/login') {
-        return handleAdminLogin($request, $db);
-    }
-    
-    if ($method === 'GET' && $path === '/api/admin/stats') {
-        return handleAdminStats($db);
-    }
-    
-    if ($method === 'GET' && $path === '/api/admin/voters') {
-        return handleAdminVoters($db);
-    }
+    // Routes
+    switch (true) {
+        case $method === 'GET' && $path === '/':
+        case $method === 'GET' && $path === '/health':
+            return handleHealthCheck($origin);
 
-    if ($method === 'GET' && $path === '/api/candidates') {
-        return handleCandidates($db);
-    }
+        case $method === 'POST' && $path === '/api/voter/login':
+            return handleVoterLogin($request, $db, $origin);
 
-    // 404 Not Found
-    return jsonResponse(['error' => 'Endpoint not found'], 404);
+        case $method === 'POST' && $path === '/api/vote':
+            return handleVote($request, $db, $origin);
+
+        case $method === 'POST' && $path === '/api/admin/login':
+            return handleAdminLogin($request, $db, $origin);
+
+        case $method === 'GET' && $path === '/api/admin/stats':
+            return handleAdminStats($db, $origin);
+
+        case $method === 'GET' && $path === '/api/admin/voters':
+            return handleAdminVoters($db, $origin);
+
+        default:
+            return jsonResponse(['error' => 'Endpoint not found'], 404, $origin);
+    }
 });
 
 // =====================================================
 // START SERVER
 // =====================================================
-$socket = new React\Socket\SocketServer('0.0.0.0:8080');
+$socket = new React\Socket\SocketServer($config['host'] . ':' . $config['port']);
 $server->listen($socket);
 
-echo "🚀 ReactPHP Server berjalan di http://localhost:8080\n";
-echo "📊 Endpoints tersedia:\n";
+echo "🚀 ReactPHP Server berjalan di http://{$config['host']}:{$config['port']}\n";
+echo "📊 Domain: api.jdrive.web.id\n";
+echo "🔐 Endpoints tersedia:\n";
+echo "   GET  /health\n";
 echo "   POST /api/voter/login\n";
 echo "   POST /api/vote\n";
 echo "   POST /api/admin/login\n";
 echo "   GET  /api/admin/stats\n";
 echo "   GET  /api/admin/voters\n";
-echo "   GET  /api/candidates\n";
 echo "\nTekan Ctrl+C untuk berhenti.\n";

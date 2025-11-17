@@ -36,8 +36,8 @@ export default function Navbar() {
                 />
               </div>
               <div className="flex flex-col leading-none">
-                <div className="text-xl text-primary leading-none">PEMIRA</div>
-                <span className="text-sm font-semibold text-[hsl(var(--brand-orange))] -mt-1">
+                <div className="text-2xl text-primary leading-none font-semibold tracking-tight">PEMIRA</div>
+                <span className="text-base font-semibold text-[hsl(var(--brand-orange))] -mt-1 tracking-wide">
                   PMK ITERA 2025
                 </span>
               </div>
@@ -50,40 +50,43 @@ export default function Navbar() {
                   .getElementById("beranda")
                   ?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="px-1 font-medium bg-transparent text-foreground hover:text-primary transition-colors relative group"
+              className="px-1 font-semibold text-lg bg-transparent text-foreground hover:text-primary transition-colors relative group tracking-wide"
             >
               Beranda
               <span className="absolute bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
             </Button>
-            <Button
-              onClick={() => {
-                document
-                  .getElementById("kandidat")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }}
-              className="px-1 font-medium bg-transparent text-muted-foreground hover:text-primary transition-colors relative group"
-            >
-              Kandidat
-              <span className="absolute bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-            </Button>
+
             <Button
               onClick={() => {
                 document
                   .getElementById("timeline")
                   ?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="px-1 font-medium bg-transparent text-muted-foreground hover:text-primary transition-colors relative group"
+              className="px-1 font-semibold text-lg bg-transparent text-muted-foreground hover:text-primary transition-colors relative group tracking-wide"
             >
               Timeline
               <span className="absolute bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
             </Button>
+            
+            <Button
+              onClick={() => {
+                document
+                  .getElementById("kandidat")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="px-1 font-semibold text-lg bg-transparent text-muted-foreground hover:text-primary transition-colors relative group tracking-wide"
+            >
+              Kandidat
+              <span className="absolute bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+            </Button>
+            
             <Button
               onClick={() => {
                 document
                   .getElementById("tentang")
                   ?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="px-1 font-medium bg-transparent text-muted-foreground hover:text-primary transition-colors relative group"
+              className="px-1 font-semibold text-lg bg-transparent text-muted-foreground hover:text-primary transition-colors relative group tracking-wide"
             >
               Tentang
               <span className="absolute bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
@@ -94,7 +97,7 @@ export default function Navbar() {
               variant="ghost"
               size="default"
               onClick={isLoggedIn && displayName ? () => navigate("/voting") : () => navigate("/voter")}
-              className="font-medium px-4 py-3 text-base transition-all ease-in-out flex rounded-lg text-white bg-[hsl(var(--accent))] hover:translate-y-[-3px]"
+              className="font-semibold text-lg px-4 py-3 tracking-wide transition-all ease-in-out flex rounded-lg text-white bg-[hsl(var(--accent))] hover:translate-y-[-3px]"
               title={isLoggedIn && displayName ? displayName : "Login"}
             >
               <Users className="w-4 h-4 mr-1" />
