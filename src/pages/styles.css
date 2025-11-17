@@ -1,0 +1,176 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: archivo;
+}
+
+body {
+    background: #F1C762;
+    min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 70px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    padding-left: 15px;
+    z-index: 999;
+}
+
+/* CONTAINER */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding-top: 100px;
+}
+
+/* PAGE HEADER */
+header {
+    text-align: center;
+    color: #2A1E09;
+    margin-bottom: 40px;
+    animation: fadeInDown 0.8s ease;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(146, 70, 3, 0.3);
+}
+
+/* GRID CARD */
+.candidates-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    animation: fadeInUp 1s ease;
+}
+
+.candidate-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(42, 30, 9, 0.3);
+    transition: 0.3s ease;
+}
+
+.candidate-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(146, 70, 3, 0.4);
+}
+
+/* FOTO */
+.candidate-photo {
+    height: 300px;
+    background: linear-gradient(135deg, #F1C762, #F7941D);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.candidate-photo img {
+    height: 100%;
+    width: auto;
+    object-fit: cover;
+}
+
+/* INFO */
+.candidate-info { padding: 25px; }
+
+.candidate-name {
+    font-size: 1.8em;
+    color: #2A1E09;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.candidate-number {
+    display: inline-block;
+    background: linear-gradient(135deg, #F1C762, #924603);
+    color: white;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* SECTION */
+.section { margin-bottom: 20px; }
+
+.section-title {
+    font-size: 1.1em;
+    color: #924603;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.section-title::before {
+    content: "▸";
+    margin-right: 8px;
+}
+
+/* LIST */
+.section-list {
+    padding-left: 25px;
+    color: #444;
+    line-height: 1.7;
+}
+
+.section-list li {
+    margin-bottom: 7px;
+    list-style: disc;
+}
+
+/* VISI (tanpa bullet) */
+.section-content {
+    color: #444;
+    line-height: 1.7;
+    padding-left: 10px;
+    font-size: 0.95em;
+}
+
+/* BUTTON */
+.view-details-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #F7941D, #924603);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.view-details-btn:hover {
+    opacity: 0.9;
+    transform: scale(1.03);
+}
+
+/* ANIMASI */
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .candidates-grid {
+        grid-template-columns: 1fr;
+    }
+}
