@@ -6,6 +6,21 @@
 All colors MUST be HSL.
 */
 
+@font-face {
+  font-family: "ArchivoVar";
+  src: url("https://res.cloudinary.com/dm3zixaz4/raw/upload/v1763313569/Archivo-VariableFont_wdth_wght_pfwhir.ttf") format("truetype");
+  font-weight: 100 900;        
+  font-stretch: 75% 125%;       
+  font-display: swap;
+}
+@font-face {
+  font-family: "ArchivoItalic";
+  src: url("https://res.cloudinary.com/dm3zixaz4/raw/upload/v1763313569/Archivo-Italic-VariableFont_wdth_wght_xygrfh.ttf") format("truetype");
+  font-weight: 100 900;
+  font-stretch: 75% 125%;
+  font-display: swap;
+}
+
 @layer base {
   :root {
     /* Pemilu Design System - Coklat, Beige, Putih, Hitam */
@@ -18,16 +33,18 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
 
-    --primary: 25 45% 35%; /* Coklat utama */
+    /* Converted from hex: #2A1E09, #F1C762, #F7941D, #924603 */
+    --primary: 38 65% 10%; /* #2A1E09 */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 30% 85%; /* Beige untuk secondary */
+    --secondary: 42 84% 66%; /* #F1C762 */
     --secondary-foreground: 0 0% 10%;
 
     --muted: 40 20% 92%;
     --muted-foreground: 0 0% 40%;
 
-    --accent: 35 40% 65%; /* Coklat muda untuk accent */
+    --brand-orange: 33 93% 54%; /* #F7941D */
+    --accent: 28 96% 29%; /* #924603 */
     --accent-foreground: 0 0% 10%;
 
     --destructive: 0 84.2% 60.2%;
@@ -41,7 +58,7 @@ All colors MUST be HSL.
     --ring: 25 45% 35%;
 
     --radius: 0.75rem;
-
+    
     --chart-1: 25 55% 45%; /* Coklat untuk kandidat 1 */
     --chart-2: 35 50% 60%; /* Coklat muda untuk kandidat 2 */
     --chart-3: 40 35% 75%; /* Beige untuk fakultas */
@@ -89,6 +106,14 @@ All colors MUST be HSL.
   }
 }
 
+@layer utilities {
+
+  .hero-padding {
+    padding-top: clamp(7rem, 12vw, 11rem);
+    padding-bottom: clamp(3rem, 7vw, 5rem);
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -96,5 +121,9 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: "ArchivoVar", system-ui, sans-serif, ui-sans-serif;
+  }
+  h1,h2,h3,h4{
+    font-family: "ArchivoVar", system-ui, sans-serif, ui-sans-serif;
   }
 }

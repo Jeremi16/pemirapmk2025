@@ -1,6 +1,6 @@
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: ["./pages/**/*.{js,jsx}", "./componenjs/**/*.{js,jsx}", "./app/**/*.{js,jsx}", "./src/**/*.{js,jsx}"],
   prefix: "",
   theme: {
     container: {
@@ -11,6 +11,10 @@ export default {
       },
     },
     extend: {
+      fontFamily:{
+        sans: ["ArchivoVar", "ui-sans-serif", "system-ui", "sans-serif"],
+        italic: ["ArchivoItalic", "ui-sans-serif", "system-ui", "sans-serif"]
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

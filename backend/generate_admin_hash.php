@@ -3,12 +3,12 @@
  * =====================================================
  * UTILITY: GENERATE & TEST ADMIN PASSWORD HASH
  * =====================================================
- * 
+ *
  * Script ini akan:
- * 1. Generate hash untuk password 'admin123'
+ * 1. Generate hash untuk password yang diset di variabel $plainPassword
  * 2. Test password_verify() untuk memastikan hash bekerja
  * 3. Memberikan SQL query untuk update database
- * 
+ *
  * Cara pakai:
  * php generate_admin_hash.php
  */
@@ -18,7 +18,7 @@ echo "ADMIN PASSWORD HASH GENERATOR & TESTER\n";
 echo "=================================================\n\n";
 
 // Password yang akan di-hash
-$plainPassword = 'admin123';
+$plainPassword = 'admin234';
 $username = 'admin';
 
 // 1. Generate hash baru
