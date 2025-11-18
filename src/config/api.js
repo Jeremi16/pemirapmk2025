@@ -1,1 +1,1 @@
-export const API_BASE_URL = "https:/api.jdrive.web.id";
+export const API_BASE_URL = "https://jdrive.web.id";
