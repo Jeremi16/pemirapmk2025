@@ -100,7 +100,6 @@ const VotingPage = () => {
       setVoting(false);
     }
   };
-
   useEffect(() => {
     // lock scroll when modal open
     if (confirmOpen) {
@@ -232,15 +231,15 @@ const VotingPage = () => {
         {confirmOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !voting && setConfirmOpen(false)} />
-            <div className="relative bg-white dark:bg-neutral-900 w-full max-w-md rounded-lg shadow-lg border p-6 animate-in fade-in zoom-in">
+            <div className="relative bg-white dark:bg-neutral-900 w-full max-w-sm rounded-lg shadow-lg border p-6 animate-in fade-in zoom-in">
               <h2 className="text-2xl font-semibold mb-4">Konfirmasi Pilihan</h2>
               <div className="text-base text-primary space-y-3">
                 <p>
                   Anda memilih <strong>Kandidat {selectedCandidate || "-"}</strong>.
                 </p>
                 {selectedDetail && (
-                  <div className="rounded-md text-center border">
-                    <img src={selectedDetail.foto_url} className="w-auto h-auto rounded-md" alt={selectedDetail.nama} />
+                  <div className="rounded-md text-center flex flex-col items-center justify-center">
+                    <img src={selectedDetail.foto_url} className="w-[70%] h-auto rounded-md" alt={selectedDetail.nama} />
                     <p className="font-semibold pt-3">{selectedDetail.nama}</p>
                   </div>
                 )}
